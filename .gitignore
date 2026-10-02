@@ -54,3 +54,4 @@ notebooks/.ipynb_checkpoints/
 *.zip
 *.tar.gz
 
+"tests/eval_report.json" 

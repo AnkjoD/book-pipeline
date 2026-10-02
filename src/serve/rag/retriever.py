@@ -87,10 +87,15 @@ def _parse_filters(question: str) -> dict[str, Any]:
         cand_title = by_match.group(1).strip()
         cand_author = by_match.group(2).strip()
         # Loại bỏ prefix như 'books', 'sách'
-        cand_title = re.sub(r'^(?:books?|cuốn sách|sách)\s+', '', cand_title, flags=re.IGNORECASE)
-        if cand_title and cand_author:
-            filters["title"] = cand_title
-            filters["author"] = cand_author
+        cand_title = re.sub(
+            r'^(?:books?|cuốn sách|sách)(?:\s+|$)',
+            '', cand_title, flags=re.IGNORECASE
+        ).strip()
+        # Always set author; only set title when it's a real title
+        if cand_author:
+            filters['author'] = cand_author
+        if cand_title and cand_title.lower() not in ('book', 'books', 'sách'):
+            filters['title'] = cand_title
 
     # 2. Rating constraints
     # min rating: rating trên 4.2 / rated at least 4.2 / rated above 4
@@ -147,6 +152,19 @@ def _parse_filters(question: str) -> dict[str, Any]:
         filters["is_impossible"] = True
     if filters["min_pages"] is not None and filters["max_pages"] is not None:
         if filters["min_pages"] > filters["max_pages"]:
+            filters["is_impossible"] = True
+
+    # Year range sanity: must be 0-2100
+    for yk in ("min_year", "max_year", "exact_year"):
+        yv = filters.get(yk)
+        if yv is not None and (yv > 2100 or yv < 0):
+            filters["is_impossible"] = True
+
+    # Catch years outside regex range (e.g. 9999, 3000) via broad scan
+    import re as _re
+    for _m in _re.finditer(r'(?:in|year|after|before|published)\s+(?:year\s+)?([0-9]{4,})', q, _re.IGNORECASE):
+        _y = int(_m.group(1))
+        if _y > 2100 or _y < 0:
             filters["is_impossible"] = True
 
     return filters
@@ -432,7 +450,7 @@ def search(question: str, limit: int = 5) -> list[dict[str, Any]]:
       - 'mixed': nếu kết hợp cả bộ lọc cấu trúc và ngữ nghĩa
     """
     if not isinstance(question, str) or not question.strip():
-        raise ValueError("Question must be a non-empty string.")
+        return []  # empty/invalid -> no results
     if limit < 1:
         raise ValueError("Limit must be at least 1.")
 

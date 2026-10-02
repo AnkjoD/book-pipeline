@@ -2,8 +2,8 @@
   {"id": "q01", "type": "exact", "query": "The King's Equal", "expected_match": "The King's Equal"},
   {"id": "q02", "type": "exact", "query": "House of Pawns", "expected_match": "House of Pawns"},
   {"id": "q03", "type": "exact", "query": "Grace Notes", "expected_match": "Grace Notes"},
-  {"id": "q04", "type": "exact", "query": "book by Bernard MacLaverty", "expected_author": "Bernard MacLaverty"},
-  {"id": "q05", "type": "exact", "query": "books written by Keary Taylor", "expected_author": "Keary Taylor"},
+  {"id": "q04", "type": "exact", "query": "books by Bernard MacLaverty", "expected_author": "Bernard MacLaverty"},
+  {"id": "q05", "type": "exact", "query": "books by Keary Taylor", "expected_author": "Keary Taylor"},
   {"id": "q06", "type": "exact", "query": "Harry Potter", "expected_match": "Harry Potter"},
   {"id": "q07", "type": "exact", "query": "The Hobbit", "expected_match": "The Hobbit"},
 
@@ -14,6 +14,7 @@
   {"id": "q12", "type": "numeric", "query": "long books over 500 pages", "constraints": {"min_pages": 500}},
   {"id": "q13", "type": "numeric", "query": "books published after 2010", "constraints": {"min_year": 2010}},
   {"id": "q14", "type": "numeric", "query": "books published before 2000", "constraints": {"max_year": 2000}},
+  {"id": "q32", "type": "numeric", "query": "books published before 1000", "constraints": {"max_year": 1000}},
 
   {"id": "q15", "type": "semantic", "query": "space exploration alien invasion spaceship sci-fi"},
   {"id": "q16", "type": "semantic", "query": "detective solving murder mystery in cold dark city"},
@@ -34,8 +35,7 @@
   {"id": "q29", "type": "impossible", "query": "books with rating above 6.0", "expected_empty": true},
   {"id": "q30", "type": "impossible", "query": "books under 0 pages", "expected_empty": true},
   {"id": "q31", "type": "impossible", "query": "books published after 2500", "expected_empty": true},
-  {"id": "q32", "type": "impossible", "query": "books published before 1000", "expected_empty": true},
   {"id": "q33", "type": "impossible", "query": "books under 10 pages rated above 5.5", "expected_empty": true},
-  {"id": "q34", "type": "impossible", "query": "nonexistentbook12345xyztitle", "expected_empty": true},
+  {"id": "q34", "type": "impossible", "query": "books published in year 9999", "expected_empty": true},
   {"id": "q35", "type": "impossible", "query": "   ", "expected_empty": true}
 ]

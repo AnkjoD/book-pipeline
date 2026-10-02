@@ -1,0 +1,236 @@
+{
+  "limit": 5,
+  "results": [
+    {
+      "qid": "q01",
+      "type": "exact",
+      "query": "The King's Equal",
+      "recall": 0.0,
+      "csr": 1.0,
+      "latency_ms": 24185.0,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q02",
+      "type": "exact",
+      "query": "House of Pawns",
+      "recall": 0.0,
+      "csr": 1.0,
+      "latency_ms": 310.9,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q03",
+      "type": "exact",
+      "query": "Grace Notes",
+      "recall": 0.0,
+      "csr": 1.0,
+      "latency_ms": 283.4,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q04",
+      "type": "exact",
+      "query": "books by Bernard MacLaverty",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 257.0,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q05",
+      "type": "exact",
+      "query": "books by Keary Taylor",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 173.0,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q06",
+      "type": "exact",
+      "query": "Harry Potter",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 286.2,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q07",
+      "type": "exact",
+      "query": "The Hobbit",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 263.7,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q08",
+      "type": "numeric",
+      "query": "books rated above 4.5",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 134.9,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q09",
+      "type": "numeric",
+      "query": "books with rating above 4",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 142.1,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q10",
+      "type": "numeric",
+      "query": "books under 200 pages",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 139.0,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q11",
+      "type": "numeric",
+      "query": "short books under 150 pages",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 122.8,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q12",
+      "type": "numeric",
+      "query": "long books over 500 pages",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 112.8,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q13",
+      "type": "numeric",
+      "query": "books published after 2010",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 116.7,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q14",
+      "type": "numeric",
+      "query": "books published before 2000",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 118.0,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q32",
+      "type": "numeric",
+      "query": "books published before 1000",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 139.3,
+      "n_results": 5,
+      "empty": false,
+      "error": null
+    },
+    {
+      "qid": "q29",
+      "type": "impossible",
+      "query": "books with rating above 6.0",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 1.8,
+      "n_results": 0,
+      "empty": true,
+      "error": null
+    },
+    {
+      "qid": "q30",
+      "type": "impossible",
+      "query": "books under 0 pages",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 1.2,
+      "n_results": 0,
+      "empty": true,
+      "error": null
+    },
+    {
+      "qid": "q31",
+      "type": "impossible",
+      "query": "books published after 2500",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 1.1,
+      "n_results": 0,
+      "empty": true,
+      "error": null
+    },
+    {
+      "qid": "q33",
+      "type": "impossible",
+      "query": "books under 10 pages rated above 5.5",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 1.5,
+      "n_results": 0,
+      "empty": true,
+      "error": null
+    },
+    {
+      "qid": "q34",
+      "type": "impossible",
+      "query": "books published in year 9999",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 1.8,
+      "n_results": 0,
+      "empty": true,
+      "error": null
+    },
+    {
+      "qid": "q35",
+      "type": "impossible",
+      "query": "   ",
+      "recall": 1.0,
+      "csr": 1.0,
+      "latency_ms": 0.8,
+      "n_results": 0,
+      "empty": true,
+      "error": null
+    }
+  ]
+}
