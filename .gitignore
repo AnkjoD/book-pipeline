@@ -51,3 +51,4 @@ docs/LEARNING_ROADMAP.md
 tests/eval_report.json
 _patch_retriever.py
 docs/  
+hardcover_full_schema.json  
