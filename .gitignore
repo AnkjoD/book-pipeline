@@ -9,50 +9,44 @@ build/
 *.egg
 .mypy_cache/
 .ruff_cache/
-
 # Secrets — KHÔNG BAO GIỜ commit
 .env
-
 # Airflow runtime
 logs/
 plugins/
-
 # Pipeline state
 checkpoints/
-
 # Data files (raw + warehouse — nặng, đã lên MinIO/DuckDB)
 data/
-
 # Papers PDF (public nhưng nặng, download lại được)
 docs/papers/*.pdf
-
 # IDE / OS
 .DS_Store
 Thumbs.db
 .vscode/settings.json
 .idea/
-
 # Spark
 derby.log
 metastore_db/
 spark-warehouse/
-
 # dbt generated artifacts
 src/transform/silver_to_gold/target/
-
 # Pytest
 .pytest_cache/
 htmlcov/
 .coverage
-
 # Jupyter
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
-
 # Archives
 *.rar
 *.zip
 *.tar.gz
 
-"tests/eval_report.json" 
-"_patch_retriever.py"  
+# Sensitive docs
+docs/AI_HANDOFF_PLAN.md
+docs/LEARNING_ROADMAP.md
+
+# Temp/eval artifacts
+tests/eval_report.json
+_patch_retriever.py
