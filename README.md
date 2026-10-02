@@ -220,17 +220,6 @@ book-pipeline/
 
 Các thư mục runtime như `checkpoints/`, `logs/`, `plugins/` hoặc `data/warehouse/` có thể xuất hiện sau khi chạy; chúng không phải source tree hiện có.
 
-## Tài liệu RAG
-
-Các đường dẫn tài liệu định hướng của dự án:
-
-- [Kiến trúc RAG](docs/RAG_ARCHITECTURE.md)
-- [Hướng dẫn triển khai RAG](docs/RAG_IMPLEMENTATION_GUIDE.md)
-- [Báo cáo nghiên cứu RAG](docs/RAG_RESEARCH_REPORT.md)
-- [Danh mục papers](docs/papers/README.md)
-
-> Lưu ý: tại trạng thái repository được kiểm tra, ba file RAG đầu chưa hiện diện; liên kết được giữ làm điểm đến tài liệu dự kiến. `docs/papers/README.md` đã có.
-
 ## Ghi chú vận hành
 
 - Airflow hiện chỉ điều phối ingestion, không nên hiểu là đã điều phối toàn bộ pipeline.
