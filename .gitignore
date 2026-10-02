@@ -55,3 +55,4 @@ notebooks/.ipynb_checkpoints/
 *.tar.gz
 
 "tests/eval_report.json" 
+"_patch_retriever.py"  
