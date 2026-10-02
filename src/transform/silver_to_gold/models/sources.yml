@@ -1,0 +1,49 @@
+version: 2
+
+sources:
+  - name: silver
+    description: "Silver Parquet files in MinIO, read by DuckDB through httpfs."
+    tables:
+      - name: silver_books
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/books/*.parquet')"
+      - name: silver_book_authors
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/book_authors/*.parquet')"
+      - name: silver_book_series
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/book_series/*.parquet')"
+      - name: silver_book_taggings
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/book_taggings/*.parquet')"
+      - name: silver_book_tag_features
+        description: "Legacy cached tag features; retained as a source but not used by the final dim_books model."
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/book_tag_features/*.parquet')"
+      - name: silver_book_characters
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/book_characters/*.parquet')"
+      - name: silver_authors
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/authors/*.parquet')"
+      - name: silver_series
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/series/*.parquet')"
+      - name: silver_editions
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/editions/*.parquet')"
+      - name: silver_publishers
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/publishers/*.parquet')"
+      - name: silver_tags
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/tags/*.parquet')"
+      - name: silver_countries
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/countries/*.parquet')"
+      - name: silver_languages
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/languages/*.parquet')"
+      - name: silver_reading_formats
+        config:
+          external_location: "read_parquet('{{ env_var('SILVER_BASE_PATH', 's3://hardcover-lake/silver') }}/reading_formats/*.parquet')"

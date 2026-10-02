@@ -1,0 +1,47 @@
+# Danh sách entity + tần suất sync định kỳ
+entities:
+  books:
+    schedule: daily          # Ofelia: 3h sáng mỗi ngày
+    incremental: true        # có updated_at → dùng sync_incremental
+    batch_size: 500
+
+  authors:
+    schedule: daily
+    incremental: false       # KHÔNG có updated_at — dùng full fetch định kỳ
+    batch_size: 500
+
+  editions:
+    schedule: daily
+    incremental: true
+    batch_size: 500
+
+  series:
+    schedule: weekly         # Ofelia: Chủ nhật 4h sáng
+    incremental: true
+    batch_size: 500
+
+  tags:
+    schedule: weekly
+    incremental: false
+    batch_size: 1000
+
+  publishers:
+    schedule: weekly
+    incremental: true
+    batch_size: 500
+
+  # Reference tables — gần như tĩnh, không cần lịch tự động
+  countries:
+    schedule: manual
+    incremental: false
+    batch_size: 200
+
+  languages:
+    schedule: manual
+    incremental: false
+    batch_size: 200
+
+  platforms:
+    schedule: manual
+    incremental: false
+    batch_size: 200

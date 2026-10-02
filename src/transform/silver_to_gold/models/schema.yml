@@ -1,0 +1,169 @@
+version: 2
+
+models:
+  - name: dim_books
+    description: "Book dimension for dashboarding, analysis and RAG preparation."
+    columns:
+      - name: book_id
+        tests:
+          - not_null
+          - unique
+      - name: title
+        tests:
+          - not_null
+      - name: chunk_text
+        tests:
+          - not_null
+
+  - name: dim_authors
+    description: "Author dimension."
+    columns:
+      - name: author_id
+        tests:
+          - not_null
+          - unique
+      - name: name
+        tests:
+          - not_null
+
+  - name: dim_editions
+    description: "Edition dimension enriched with publisher, language, country and reading format."
+    columns:
+      - name: edition_id
+        tests:
+          - not_null
+          - unique
+      - name: book_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_books')
+                field: book_id
+
+  - name: dim_tags
+    description: "Normalized tag dictionary with business category names."
+    columns:
+      - name: tag_id
+        tests:
+          - not_null
+          - unique
+      - name: tag_name
+        tests:
+          - not_null
+      - name: tag_category
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Genre
+                  - Tag
+                  - Mood
+                  - Content Warning
+                  - Pace
+                  - Unknown
+              config:
+                severity: warn
+
+  - name: bridge_book_tags
+    description: "Many-to-many relationship between books and tags."
+    tests:
+      - unique:
+          arguments:
+            column_name: "book_id || '-' || tag_id"
+    columns:
+      - name: book_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_books')
+                field: book_id
+      - name: tag_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_tags')
+                field: tag_id
+
+  - name: bridge_book_authors
+    description: "Many-to-many relationship between books and authors."
+    tests:
+      - unique:
+          arguments:
+            column_name: "book_id || '-' || author_id"
+    columns:
+      - name: book_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_books')
+                field: book_id
+      - name: author_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_authors')
+                field: author_id
+
+  - name: fact_book_metrics
+    description: "Latest available metrics for each book; this is not a historical snapshot."
+    columns:
+      - name: book_id
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_books')
+                field: book_id
+
+  - name: rag_documents
+    description: "One document per book before chunking and embedding."
+
+    columns:
+      - name: book_id
+        description: "Stable book identifier."
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_books')
+                field: book_id
+
+      - name: title
+        tests:
+          - not_null
+
+      - name: document_text
+        description: "Full document text before chunking."
+        tests:
+          - not_null
+
+      - name: document_hash
+        description: "Hash of normalized document text."
+        tests:
+          - not_null
+
+      - name: document_quality
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Rich
+                  - Metadata
+                  - Poor
+
+      - name: document_duplicate_rank
+        tests:
+          - not_null
+
+      - name: is_embedding_candidate
+        tests:
+          - not_null

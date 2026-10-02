@@ -1,0 +1,21 @@
+# Hardcover Data Pipeline — Python Dependencies
+# Dùng cho cả Airflow image (Dockerfile.airflow) và dev local.
+
+# HTTP client
+requests>=2.31.0
+
+# Retry với exponential backoff
+tenacity>=8.2.0
+
+# Đọc file .env
+python-dotenv>=1.0.0
+
+# CLI (dùng trong main.py nếu chạy thủ công)
+click>=8.1.0
+
+# Progress bar trong base_fetcher
+tqdm>=4.66.0
+
+# MinIO client — upload JSONL lên data lake
+minio>=7.2.0
+

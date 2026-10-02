@@ -1,0 +1,11 @@
+FROM apache/airflow:2.9.2-python3.11
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Cài đúng group [ingestion] từ pyproject.toml — không cần requirements.txt riêng
+COPY pyproject.toml /tmp/pyproject.toml
+RUN pip install --no-cache-dir "requests>=2.31.0" "python-dotenv>=1.0.0" "tqdm>=4.66.0" "minio>=7.2.0"

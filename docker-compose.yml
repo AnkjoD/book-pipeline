@@ -1,0 +1,170 @@
+# ============================================================
+# Hardcover Data Pipeline — Docker Compose (Airflow + MinIO)
+# ============================================================
+#
+# Gồm các service:
+#   postgres          — metadata DB của Airflow
+#   minio             — data lake (Bronze/Silver/Gold zones)
+#   airflow-init      — khởi tạo DB + tạo user admin (chạy 1 lần rồi exit)
+#   airflow-webserver — UI tại http://localhost:8080  (admin/admin)
+#   airflow-scheduler — đọc DAGs, kích hoạt task theo lịch
+#
+# Cách dùng:
+#   1. Tạo .env từ .env.example rồi điền đủ biến
+#   2. docker compose up airflow-init        ← chờ xong rồi Ctrl+C
+#   3. docker compose up -d                  ← chạy nền
+#   4. Vào http://localhost:8080, bật DAG "hardcover_ingestion_full"
+#      trigger thủ công để fetch lần đầu.
+#   5. Sau khi full fetch xong, bật 2 DAG daily + weekly — Airflow
+#      tự chạy theo lịch.
+# ============================================================
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  environment:
+    &airflow-common-env # ── Airflow core ─────────────────────────────────────────
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-changeme_in_env}
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    # ── Python path — để import được `ingestion` từ /opt/airflow/ingestion ──
+    PYTHONPATH: /opt/airflow
+    # ── Hardcover API ─────────────────────────────────────────
+    HARDCOVER_API_KEY: ${HARDCOVER_API_KEY}
+    # ── MinIO ─────────────────────────────────────────────────
+    MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+    MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+    MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+    MINIO_BUCKET: ${MINIO_BUCKET:-hardcover-lake}
+  volumes:
+    - ./src/orchestrate/dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./checkpoints:/opt/airflow/checkpoints
+    - ./src/ingestion:/opt/airflow/ingestion
+    - ./src/clients:/opt/airflow/clients
+  depends_on: &airflow-common-depends-on
+    postgres:
+      condition: service_healthy
+
+services:
+  # ── Postgres pgvector — Vector store cho RAG ─────────────────────────────
+  postgres-vector:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag
+      POSTGRES_DB: books_rag
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgvector-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # ── Postgres — Airflow metadata DB ───────────────────────────────────────
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # ── MinIO — Data Lake ─────────────────────────────────────────────────────
+  minio:
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    volumes:
+      - minio-data:/data
+
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: always
+
+  # ── Airflow Init — chạy 1 lần, exit sau khi xong ────────────────────────
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Admin \
+          --lastname Admin \
+          --role Admin \
+          --email admin@example.com
+        echo "=== Airflow init DONE ==="
+
+  # ── Airflow Webserver — UI http://localhost:8080 ─────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+  # ── Airflow Scheduler — đọc DAG và kick task theo lịch ──────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres-db:
+  minio-data:
+  pgvector-data:

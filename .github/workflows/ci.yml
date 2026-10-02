@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dev + ingestion deps
+        run: pip install -e ".[ingestion,dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src/ tests/
+
+      - name: Test (pytest)
+        run: pytest -v
+        env:
+          HARDCOVER_API_KEY: dummy
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+          MINIO_BUCKET: test-bucket
