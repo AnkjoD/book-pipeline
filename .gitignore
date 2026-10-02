@@ -50,3 +50,4 @@ docs/LEARNING_ROADMAP.md
 # Temp/eval artifacts
 tests/eval_report.json
 _patch_retriever.py
+docs/  
