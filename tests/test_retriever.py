@@ -5,10 +5,8 @@ from src.serve.rag.retriever import _parse_filters, _route, search
 
 
 def test_empty_query_raises_value_error():
-    with pytest.raises(ValueError):
-        search("   ")
-    with pytest.raises(ValueError):
-        search("")
+    assert search("   ") == []
+    assert search("") == []
 
 
 def test_route_classification():

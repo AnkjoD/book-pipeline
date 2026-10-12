@@ -13,7 +13,7 @@ from typing import Any
 
 import duckdb
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_postgres import PGVector
 
 load_dotenv()
@@ -86,15 +86,17 @@ def _parse_filters(question: str) -> dict[str, Any]:
     if by_match:
         cand_title = by_match.group(1).strip()
         cand_author = by_match.group(2).strip()
-        # Loại bỏ prefix như 'books', 'sách'
+        # Strip trailing punctuation (? , . !)
+        cand_author = re.sub(r'[\?\.,!]+$', '', cand_author).strip()
+        # Clean question prefixes from cand_title
         cand_title = re.sub(
-            r'^(?:books?|cuốn sách|sách)(?:\s+|$)',
+            r'^(?:what|which|show|list|tell|find|get|any)?\s*(?:books?|all books?|cuốn sách|sách)?\s*(?:were|are)?\s*(?:written|authored)?(?:\s+|$)',
             '', cand_title, flags=re.IGNORECASE
         ).strip()
-        # Always set author; only set title when it's a real title
         if cand_author:
             filters['author'] = cand_author
-        if cand_title and cand_title.lower() not in ('book', 'books', 'sách'):
+        # Only treat as real title if not a generic question word
+        if cand_title and cand_title.lower() not in ('book', 'books', 'sách', 'all', 'what', 'which'):
             filters['title'] = cand_title
 
     # 2. Rating constraints
