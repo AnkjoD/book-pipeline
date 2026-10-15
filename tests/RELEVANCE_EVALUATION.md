@@ -38,3 +38,14 @@ Giữ dataset cố định khi so trước/sau. Chỉ dựng lại khi cần rev
 ```powershell
 python -m scripts.build_relevance_dataset
 ```
+
+Để kiểm tra model hiểu câu sai ở đâu, chạy chẩn đoán chỉ đọc:
+
+```powershell
+python -m scripts.diagnose_query_understanding
+```
+
+Script lưu raw model, plan sau guard, bộ lọc thực thi, kết quả public và các phép
+thử bỏ filter/dùng câu Anh vào `data/reports/query_understanding_diagnosis.json`
+và `.md`. Plan được giữ cố định khi kiểm tra để không gọi model lần nữa rồi so
+hai plan khác nhau. Các probe là thí nghiệm, không thay đổi retriever phục vụ.
