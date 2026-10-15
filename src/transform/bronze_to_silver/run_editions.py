@@ -4,13 +4,12 @@ import logging
 
 from dotenv import load_dotenv
 
+from transform.bronze_to_silver import editions
 from transform.bronze_to_silver.shared import (
     get_spark,
     list_bronze_keys,
     write_silver,
 )
-from transform.bronze_to_silver import editions
-
 
 load_dotenv()
 
@@ -26,9 +25,7 @@ if __name__ == "__main__":
     keys = list_bronze_keys("editions")
 
     if not keys:
-        raise RuntimeError(
-            "Không tìm thấy file Bronze cho entity editions."
-        )
+        raise RuntimeError("Không tìm thấy file Bronze cho entity editions.")
 
     logger.info(
         "editions: reading toàn bộ %d Bronze files",
@@ -41,11 +38,7 @@ if __name__ == "__main__":
     )
 
     try:
-        raw_editions = (
-            spark.read
-            .option("mergeSchema", "true")
-            .json(keys)
-        )
+        raw_editions = spark.read.option("mergeSchema", "true").json(keys)
 
         silver_editions = editions.transform(raw_editions)
 

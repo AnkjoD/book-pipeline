@@ -17,24 +17,24 @@ MỞ RỘNG THÊM ENTITY MỚI:
 """
 
 import argparse
-import os
 import logging
+import os
 
 from dotenv import load_dotenv
 
 from clients import HardcoverClient
-from ingestion.fetchers.books_fetcher import BooksFetcher
 from ingestion.fetchers.authors_fetcher import AuthorsFetcher
-from ingestion.fetchers.series_fetcher import SeriesFetcher
-from ingestion.fetchers.tags_fetcher import TagsFetcher
+from ingestion.fetchers.books_fetcher import BooksFetcher
 from ingestion.fetchers.editions_fetcher import EditionsFetcher
 from ingestion.fetchers.publishers_fetcher import PublishersFetcher
 from ingestion.fetchers.reference_fetchers import (
     CountriesFetcher,
     LanguagesFetcher,
-    ReadingFormatsFetcher,
     PlatformsFetcher,
+    ReadingFormatsFetcher,
 )
+from ingestion.fetchers.series_fetcher import SeriesFetcher
+from ingestion.fetchers.tags_fetcher import TagsFetcher
 
 load_dotenv()
 logging.basicConfig(
@@ -82,7 +82,9 @@ DEFAULT_FILTERS = {
 }
 
 
-def run_fetch(entity_key: str, mode: str = "full", batch_size: int = 100, checkpoint_dir: str = "checkpoints") -> int:
+def run_fetch(
+    entity_key: str, mode: str = "full", batch_size: int = 100, checkpoint_dir: str = "checkpoints"
+) -> int:
     """
     Hàm fetch chính — dùng được từ cả CLI lẫn Airflow PythonOperator.
 
@@ -104,6 +106,7 @@ def run_fetch(entity_key: str, mode: str = "full", batch_size: int = 100, checkp
     # Khởi tạo minio TRƯỚC để fail sớm nếu cấu hình sai,
     # thay vì fetch xong hàng triệu record rồi mới phát hiện không upload được.
     from clients import MinioClient
+
     minio = MinioClient.from_env()
 
     client = HardcoverClient(api_key=api_key)
@@ -124,15 +127,13 @@ def run_fetch(entity_key: str, mode: str = "full", batch_size: int = 100, checkp
                 logger.info(f"[{entity_key}] Tổng số record: {total:,}")
             except Exception as e:
                 logger.warning(
-                    f"[{entity_key}] Không đếm được tổng số record ({e}) "
-                    "— tiến độ sẽ không hiện %"
+                    f"[{entity_key}] Không đếm được tổng số record ({e}) — tiến độ sẽ không hiện %"
                 )
                 total = None
         else:
             total = None
             logger.info(
-                f"[{entity_key}] API không hỗ trợ aggregate count "
-                "— fetch không hiển thị phần trăm"
+                f"[{entity_key}] API không hỗ trợ aggregate count — fetch không hiển thị phần trăm"
             )
 
         return fetcher.fetch_all(
@@ -144,10 +145,8 @@ def run_fetch(entity_key: str, mode: str = "full", batch_size: int = 100, checkp
         return fetcher.sync_incremental(extra_where=where)
 
     else:
-        raise ValueError(
-            f"mode không hợp lệ: {mode!r}. "
-            "Dùng 'full' hoặc 'incremental'."
-        )
+        raise ValueError(f"mode không hợp lệ: {mode!r}. Dùng 'full' hoặc 'incremental'.")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Hardcover data ingestion CLI")
@@ -193,8 +192,9 @@ def main():
         selected = CORE_ENTITY_KEYS if args.entity == "core" else tuple(FETCHER_REGISTRY)
         if args.entity in {"core", "all"} and args.mode == "incremental":
             targets = [
-                name for name in selected
-                if (fetcher_cls := FETCHER_REGISTRY[name]).incremental_field
+                name
+                for name in selected
+                if FETCHER_REGISTRY[name].incremental_field
             ]
             skipped = [name for name in selected if name not in targets]
             logger.warning(

@@ -34,6 +34,7 @@ class BaseFetcher:
     incremental_field: str | None = "updated_at"
     api_max_batch_size: int = 100
     supports_count: bool = True
+
     def __init__(
         self,
         client: HardcoverClient,
@@ -61,8 +62,12 @@ class BaseFetcher:
         # Tách 2 file checkpoint để full-fetch và incremental-sync không đụng nhau:
         #   full_checkpoint  → lưu offset để resume khi fetch toàn bộ lịch sử
         #   sync_checkpoint  → lưu thời điểm để lọc updated_at khi chạy định kỳ
-        self.full_checkpoint_path = Path(checkpoint_dir) / f"{self.entity_name}_full_checkpoint.json"
-        self.sync_checkpoint_path = Path(checkpoint_dir) / f"{self.entity_name}_sync_checkpoint.json"
+        self.full_checkpoint_path = (
+            Path(checkpoint_dir) / f"{self.entity_name}_full_checkpoint.json"
+        )
+        self.sync_checkpoint_path = (
+            Path(checkpoint_dir) / f"{self.entity_name}_sync_checkpoint.json"
+        )
         self.full_checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     # ── FULL FETCH CHECKPOINT ────────────────────────────────────────────────
@@ -164,7 +169,9 @@ class BaseFetcher:
 
     # ── GHI BATCH LÊN MINIO ─────────────────────────────────────────────────
 
-    def _write_batch(self, records: list[dict], run_tag: str, offset: int, batch_number: int | None = None):
+    def _write_batch(
+        self, records: list[dict], run_tag: str, offset: int, batch_number: int | None = None
+    ):
         """
         Serialize records → JSONL bytes → upload thẳng lên MinIO, không ghi local.
         Tên file gồm run_tag + offset đảm bảo không bao giờ trùng nhau giữa các lần chạy.
@@ -201,9 +208,7 @@ class BaseFetcher:
             # sync bị thất lạc. Checkpoint cũ không có mốc này thì giữ nguyên:
             # lần incremental đầu sẽ đọc lại an toàn thay vì có nguy cơ bỏ sót.
             if self.incremental_field and not self.sync_checkpoint_path.exists():
-                checkpoint = json.loads(
-                    self.full_checkpoint_path.read_text(encoding="utf-8")
-                )
+                checkpoint = json.loads(self.full_checkpoint_path.read_text(encoding="utf-8"))
                 original_start = checkpoint.get("full_fetch_started_at")
                 if original_start:
                     self._save_last_sync_time(original_start)
@@ -247,7 +252,9 @@ class BaseFetcher:
                 records = result["data"][self.entity_name]
 
                 if not records:  # batch rỗng → hết data
-                    logger.info(f"[{self.entity_name}] Không còn data tại offset {offset:,} — dừng.")
+                    logger.info(
+                        f"[{self.entity_name}] Không còn data tại offset {offset:,} — dừng."
+                    )
                     break
 
                 self._write_batch(records, run_tag, offset, batch_number=batch_number)
@@ -271,7 +278,9 @@ class BaseFetcher:
                     elapsed = time.monotonic() - start_time
                     rate = (fetched_total - start_offset) / elapsed if elapsed > 0 else 0
                     remaining = (total_count - fetched_total) / rate if rate > 0 else float("inf")
-                    eta_str = f"{remaining/60:.0f}m" if remaining < 3600 else f"{remaining/3600:.1f}h"
+                    eta_str = (
+                        f"{remaining / 60:.0f}m" if remaining < 3600 else f"{remaining / 3600:.1f}h"
+                    )
                     pct = fetched_total / total_count * 100
                     logger.info(
                         f"[{self.entity_name}] Batch {batch_number - 1} | "

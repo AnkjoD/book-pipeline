@@ -4,14 +4,12 @@ Không gọi Hardcover API thật (toàn bộ mock).
 """
 
 import json
-import pytest
-from unittest.mock import MagicMock, patch, call
-from pathlib import Path
+from unittest.mock import MagicMock
 
 from ingestion.fetchers.books_fetcher import BooksFetcher
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
+
 
 def _make_record(i: int) -> dict:
     return {"id": i, "title": f"Book {i}", "updated_at": "2024-01-01T00:00:00Z"}
@@ -32,14 +30,14 @@ def _fake_minio() -> MagicMock:
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
+
 def test_fetch_all_single_batch(tmp_path):
     """Fetch xong trong 1 batch (n < batch_size → dừng khi rỗng)."""
     records = [_make_record(i) for i in range(3)]
     client = _fake_client([records, []])
     minio = _fake_minio()
 
-    fetcher = BooksFetcher(client=client, minio=minio,
-                           checkpoint_dir=str(tmp_path), batch_size=10)
+    fetcher = BooksFetcher(client=client, minio=minio, checkpoint_dir=str(tmp_path), batch_size=10)
     total = fetcher.fetch_all(total_count=3)
 
     assert total == 3
@@ -56,8 +54,7 @@ def test_fetch_all_multi_batch(tmp_path):
     client = _fake_client([batch1, batch2, []])
     minio = _fake_minio()
 
-    fetcher = BooksFetcher(client=client, minio=minio,
-                           checkpoint_dir=str(tmp_path), batch_size=5)
+    fetcher = BooksFetcher(client=client, minio=minio, checkpoint_dir=str(tmp_path), batch_size=5)
     total = fetcher.fetch_all(total_count=8)
 
     assert total == 8
@@ -74,8 +71,7 @@ def test_fetch_all_resume(tmp_path):
     client = _fake_client([batch2, []])
     minio = _fake_minio()
 
-    fetcher = BooksFetcher(client=client, minio=minio,
-                           checkpoint_dir=str(tmp_path), batch_size=5)
+    fetcher = BooksFetcher(client=client, minio=minio, checkpoint_dir=str(tmp_path), batch_size=5)
     total = fetcher.fetch_all(total_count=8)
 
     assert total == 8  # fetched_total = start_offset(5) + 3 mới = 8
@@ -92,8 +88,7 @@ def test_fetch_all_skip_if_done(tmp_path):
     client = _fake_client([])
     minio = _fake_minio()
 
-    fetcher = BooksFetcher(client=client, minio=minio,
-                           checkpoint_dir=str(tmp_path), batch_size=10)
+    fetcher = BooksFetcher(client=client, minio=minio, checkpoint_dir=str(tmp_path), batch_size=10)
     total = fetcher.fetch_all()
 
     assert total == 0
@@ -110,8 +105,7 @@ def test_sync_incremental_uses_updated_at(tmp_path):
     client = _fake_client([records, []])  # batch 2 rỗng → dừng
     minio = _fake_minio()
 
-    fetcher = BooksFetcher(client=client, minio=minio,
-                           checkpoint_dir=str(tmp_path), batch_size=10)
+    fetcher = BooksFetcher(client=client, minio=minio, checkpoint_dir=str(tmp_path), batch_size=10)
     total = fetcher.sync_incremental()
 
     assert total == 1

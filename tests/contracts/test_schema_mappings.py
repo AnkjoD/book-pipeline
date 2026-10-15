@@ -2,6 +2,7 @@ import ast
 import json
 from pathlib import Path
 
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -53,8 +54,15 @@ def test_core_catalog_excludes_optional_platforms():
 def test_every_core_entity_has_a_silver_transform():
     transform_dir = ROOT / "src/transform/bronze_to_silver"
     for module in [
-        "books", "authors", "editions", "series", "tags", "publishers",
-        "countries", "languages", "reading_formats",
+        "books",
+        "authors",
+        "editions",
+        "series",
+        "tags",
+        "publishers",
+        "countries",
+        "languages",
+        "reading_formats",
     ]:
         assert (transform_dir / f"{module}.py").exists()
 
@@ -78,7 +86,10 @@ def test_transform_does_not_filter_nonexistent_merged_state():
 
 
 def test_every_queried_entity_exists_in_schema():
-    schema = json.loads((ROOT / "hardcover_full_schema.json").read_text(encoding="utf-8"))
+    schema_path = ROOT / "hardcover_full_schema.json"
+    if not schema_path.exists():
+        pytest.skip("Optional local Hardcover schema is excluded from the public repository")
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
     for entity in [
         "Books",
         "Authors",

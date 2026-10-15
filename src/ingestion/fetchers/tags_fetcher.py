@@ -1,4 +1,4 @@
-"""Fetcher cho entity 'tags' (dimension table nhẹ, bổ sung mô tả/category cho tag_id đã có trong taggings)."""
+"""Fetcher tags: bổ sung mô tả/category cho tag_id đã có trong taggings."""
 
 from ingestion.fetchers.base_fetcher import BaseFetcher
 

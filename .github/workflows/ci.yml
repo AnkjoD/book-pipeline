@@ -16,14 +16,14 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install dev + ingestion deps
-        run: pip install -e ".[ingestion,dev]"
+      - name: Install application and test deps
+        run: pip install -e ".[ingestion,serve,dev]"
 
       - name: Lint (ruff)
         run: ruff check src/ tests/
 
       - name: Test (pytest)
-        run: pytest -v
+        run: pytest -v -m "not integration"
         env:
           HARDCOVER_API_KEY: dummy
           MINIO_ENDPOINT: localhost:9000

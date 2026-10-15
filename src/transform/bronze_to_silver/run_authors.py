@@ -1,6 +1,7 @@
 import logging
-from transform.bronze_to_silver.shared import get_spark, read_bronze, write_silver
+
 from transform.bronze_to_silver import authors
+from transform.bronze_to_silver.shared import get_spark, read_bronze, write_silver
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 

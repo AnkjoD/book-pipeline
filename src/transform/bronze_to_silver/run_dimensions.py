@@ -1,6 +1,6 @@
 import logging
 import sys
-from transform.bronze_to_silver.shared import get_spark, read_bronze, write_silver
+
 from transform.bronze_to_silver import (
     countries,
     editions,
@@ -11,17 +11,18 @@ from transform.bronze_to_silver import (
     series,
     tags,
 )
+from transform.bronze_to_silver.shared import get_spark, read_bronze, write_silver
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 _JOBS = {
-    "series":     series.transform,
-    "editions":   editions.transform,
+    "series": series.transform,
+    "editions": editions.transform,
     "publishers": publishers.transform,
-    "tags":       tags.transform,
-    "countries":  countries.transform,
-    "languages":  languages.transform,
-    "platforms":  platforms.transform,
+    "tags": tags.transform,
+    "countries": countries.transform,
+    "languages": languages.transform,
+    "platforms": platforms.transform,
     "reading_formats": reading_formats.transform,
 }
 

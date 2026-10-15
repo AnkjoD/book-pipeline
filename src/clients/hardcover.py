@@ -5,6 +5,7 @@ Tự retry với exponential backoff khi gặp rate limit (429) hoặc lỗi m�
 
 import logging
 import time
+
 import requests
 
 logger = logging.getLogger(__name__)
@@ -22,10 +23,12 @@ class HardcoverClient:
         self.session = requests.Session()
         token = api_key.strip()
         authorization = token if token.lower().startswith("bearer ") else f"Bearer {token}"
-        self.session.headers.update({
-            "Content-Type": "application/json",
-            "Authorization": authorization,
-        })
+        self.session.headers.update(
+            {
+                "Content-Type": "application/json",
+                "Authorization": authorization,
+            }
+        )
 
     def execute_query(self, query: str, variables: dict | None = None) -> dict:
         """
@@ -46,7 +49,7 @@ class HardcoverClient:
 
                 if resp.status_code == 429:
                     last_error = RuntimeError("Hardcover API rate limit (429)")
-                    wait = min(2 ** attempt, 60)
+                    wait = min(2**attempt, 60)
                     logger.warning(
                         f"Rate limit (429) — chờ {wait}s (lần {attempt}/{self.max_retries})"
                     )
@@ -56,9 +59,10 @@ class HardcoverClient:
 
                 if resp.status_code >= 500:
                     last_error = RuntimeError(f"Hardcover API server error ({resp.status_code})")
-                    wait = min(2 ** attempt, 60)
+                    wait = min(2**attempt, 60)
                     logger.warning(
-                        f"Lỗi server {resp.status_code} — chờ {wait}s (lần {attempt}/{self.max_retries})"
+                        f"Lỗi server {resp.status_code} — chờ {wait}s "
+                        f"(lần {attempt}/{self.max_retries})"
                     )
                     if attempt < self.max_retries:
                         time.sleep(wait)
@@ -76,12 +80,14 @@ class HardcoverClient:
 
             except (requests.ConnectionError, requests.Timeout) as e:
                 last_error = e
-                wait = min(2 ** attempt, 60)
+                wait = min(2**attempt, 60)
                 logger.warning(f"Lỗi mạng: {e} — chờ {wait}s (lần {attempt}/{self.max_retries})")
                 if attempt < self.max_retries:
                     time.sleep(wait)
 
-        raise RuntimeError(f"Query thất bại sau {self.max_retries} lần retry. Lỗi cuối: {last_error}")
+        raise RuntimeError(
+            f"Query thất bại sau {self.max_retries} lần retry. Lỗi cuối: {last_error}"
+        )
 
     def count(self, entity: str, where: dict | None = None) -> int:
         """
