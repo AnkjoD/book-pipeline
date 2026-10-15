@@ -67,7 +67,7 @@ flowchart LR
 
 ### Planned
 
-- Lexical retrieval, RRF, nhãn relevance tiếng Việt được người dùng duyệt và kiểm chứng từng nhận định.
+- Mở rộng lexical/RRF và local graph thử nghiệm ra corpus đầy đủ; nhãn relevance được người dùng duyệt và kiểm chứng từng nhận định.
 - Index có phiên bản và cập nhật tăng dần.
 - Mở rộng Airflow từ ingestion sang Bronze → Silver → Gold → vector index.
 - Thêm quan sát chất lượng dữ liệu và vận hành production.
@@ -205,6 +205,8 @@ Smoke report lưu ở `data/reports/rag_smoke.json`. Nó kiểm tra luồng dị
 Test offline/CI: `python -m pytest -q -m "not integration"`. Test integration cần Gold, pgvector và embedding model. Nếu model đã có cache, có thể dùng `set HF_HUB_OFFLINE=1` để tránh gọi Hugging Face khi khởi động.
 
 **Reranker tùy chọn:** đã tích hợp cross-encoder CPU, nhận English semantic query sau bước hiểu câu Việt. Đặt `RAG_RERANK_ENABLED=1` trước khi mở app để bật; mặc định 0. Chỉ xếp lại ứng viên đã lọc, giữ metadata/evidence, bỏ qua SQL và tra tên sách. Model lỗi thì quay về thứ tự retrieval có ghi trạng thái fallback. Chạy `python -m scripts.benchmark_reranking` để so trên cùng candidate pool. Trong bộ 40 câu dev hiện tại, reranker giữ nguyên hit rate/MRR và thêm khoảng nửa giây cho mỗi câu được rerank, nên chưa bật mặc định.
+
+**Hybrid/GraphRAG thử nghiệm:** đã có BM25+dense qua RRF và local graph+dense trên artifact 300 sách. Dựng bằng `python -m scripts.build_search_experiment`, so bằng `python -m scripts.compare_search_strategies`. Trong sidebar chọn **Cách tìm sách** để thử; mặc định giữ baseline. Xem [hướng dẫn và giới hạn](tests/SEARCH_EXPERIMENT.md). Chưa có community/global search của Microsoft GraphRAG; dữ liệu graph/lexical không thay thế full index hiện có.
 
 `build_index.py` xóa collection trước khi rebuild; chỉ chạy khi chủ động cần dựng lại. Walkthrough và các bài tự code nâng cấp nằm tại `docs/WALKTHROUGH_2026-10-15.md` và `docs/learning/README.md` (thư mục docs hiện bị Git ignore).
 

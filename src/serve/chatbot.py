@@ -29,6 +29,24 @@ with st.sidebar:
         index=0,
     )
     doc_limit = st.slider("Document Limit (Top-K)", min_value=1, max_value=10, value=5)
+    search_choices = {
+        "Hiện tại": "baseline",
+        "Từ khóa + ngữ nghĩa (thử nghiệm)": "hybrid",
+        "Theo quan hệ GraphRAG (thử nghiệm)": "graph",
+    }
+    search_choice = st.selectbox("Cách tìm sách", options=list(search_choices))
+    retrieval_mode = search_choices[search_choice]
+    if retrieval_mode != "baseline":
+        from src.serve.rag.experimental import load_corpus
+
+        try:
+            experiment_manifest, _ = load_corpus()
+            st.caption(
+                f"Thử nghiệm trên {experiment_manifest['books']} sách; "
+                "kho tìm kiếm hiện tại được giữ riêng."
+            )
+        except (FileNotFoundError, ValueError):
+            st.info("Chưa có kho thử nghiệm hợp lệ. Bạn có thể dùng cách tìm hiện tại.")
     st.markdown("---")
     st.markdown(
         "**Pipeline Features**:\n"
@@ -82,6 +100,7 @@ if prompt := st.chat_input("Hỏi bằng tiếng Việt về sách, tác giả, 
                 prompt,
                 limit=doc_limit,
                 model=model_choice,
+                retrieval_mode=retrieval_mode,
             )
 
         st.markdown(result["answer"])

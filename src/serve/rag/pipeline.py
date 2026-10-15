@@ -39,6 +39,7 @@ def run_rag_pipeline(
     limit: int = 5,
     model: Optional[str] = None,
     max_retries: int = 1,
+    retrieval_mode: str = "baseline",
 ) -> Dict[str, Any]:
     """
     Execute full RAG pipeline for a given user question.
@@ -57,7 +58,12 @@ def run_rag_pipeline(
     """
     # 1. Retrieve evidence documents
     try:
-        documents = search(question, limit=limit)
+        if retrieval_mode == "baseline":
+            documents = search(question, limit=limit)
+        else:
+            from src.serve.rag.experimental import search_experiment
+
+            documents = search_experiment(question, limit=limit, mode=retrieval_mode)
     except (QueryClarification, QueryUnderstandingError) as exc:
         status = "CLARIFY" if isinstance(exc, QueryClarification) else "ERROR"
         return {
