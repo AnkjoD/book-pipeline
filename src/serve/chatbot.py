@@ -6,7 +6,9 @@ Displays:
 - Verifier verdict badge (ACCEPT / ABSTAIN / REGENERATE)
 - Collapsible evidence provenance (Title, Author, Rating, Source)
 """
+
 import streamlit as st
+
 from src.serve.rag.pipeline import run_rag_pipeline
 
 st.set_page_config(
@@ -50,6 +52,8 @@ for msg in st.session_state.messages:
                 "ACCEPT": "🟢 ACCEPT",
                 "ABSTAIN": "🟡 ABSTAIN",
                 "REGENERATE": "🔴 REGENERATE",
+                "ERROR": "🔴 ERROR",
+                "CLARIFY": "🟡 Cần làm rõ",
             }.get(status, status)
 
             st.caption(f"Status: **{badge_color}** | Retrieved: {meta.get('retrieved_count')} docs")
@@ -65,7 +69,7 @@ for msg in st.session_state.messages:
                         )
 
 # Input prompt
-if prompt := st.chat_input("Ask about books, authors, ratings, publication years..."):
+if prompt := st.chat_input("Hỏi bằng tiếng Việt về sách, tác giả, nội dung hoặc điều kiện tìm..."):
     # Render user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -84,9 +88,11 @@ if prompt := st.chat_input("Ask about books, authors, ratings, publication years
 
         status = result["verification_status"]
         badge_label = {
-            "ACCEPT": "🟢 ACCEPT (Grounded)",
+            "ACCEPT": "🟢 ACCEPT (Citations checked)",
             "ABSTAIN": "🟡 ABSTAIN (No Evidence)",
             "REGENERATE": "🔴 REGENERATE (Citation Mismatch)",
+            "ERROR": "🔴 ERROR (Service unavailable)",
+            "CLARIFY": "🟡 Cần bạn nói rõ điều kiện",
         }.get(status, status)
 
         st.caption(f"Status: **{badge_label}** | Retrieved: {result['retrieved_count']} docs")
@@ -101,8 +107,10 @@ if prompt := st.chat_input("Ask about books, authors, ratings, publication years
                     )
 
     # Append assistant message with metadata
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": result["answer"],
-        "meta": result,
-    })
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": result["answer"],
+            "meta": result,
+        }
+    )

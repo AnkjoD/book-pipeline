@@ -49,3 +49,15 @@ Script lưu raw model, plan sau guard, bộ lọc thực thi, kết quả public
 thử bỏ filter/dùng câu Anh vào `data/reports/query_understanding_diagnosis.json`
 và `.md`. Plan được giữ cố định khi kiểm tra để không gọi model lần nữa rồi so
 hai plan khác nhau. Các probe là thí nghiệm, không thay đổi retriever phục vụ.
+
+Reranker tùy chọn đã có trong public search. So sánh trên cùng candidate pool:
+
+```powershell
+python -m scripts.benchmark_reranking
+```
+
+Báo cáo lưu tại `data/reports/reranking_comparison.json`, bao gồm smoke qua public
+search/pipeline với reranker bật. Bộ 40 câu dev sau sửa parser có hit@5 36/36 câu
+có positive, 4/4 unanswerable đúng; reranker giữ nguyên MRR/hit và thêm khoảng
+0.53 giây trên mỗi câu được rerank. Vì vậy mặc định `RAG_RERANK_ENABLED=0`.
+Không coi đây là đánh giá giữ riêng hoặc chứng minh mọi câu hỏi đều đúng.

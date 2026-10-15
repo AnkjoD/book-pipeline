@@ -6,7 +6,7 @@ import sys
 # Ensure project root is in sys.path
 sys.path.insert(0, os.path.abspath("."))
 
-from src.serve.rag.retriever import _parse_filters, _route, search
+from src.serve.rag.retriever import _route, search
 
 
 def run_all_checks():
@@ -14,11 +14,8 @@ def run_all_checks():
 
     # 1. Empty query check
     print("\n[1/6] Kiem tra Empty Query...")
-    try:
-        search("   ")
-        assert False, "Phai raise ValueError khi query rong"
-    except ValueError as e:
-        print(f"  PASS: Raise ValueError voi message: '{e}'")
+    assert search("   ") == [], "Query rong phai tra danh sach rong"
+    print("  PASS: Query rong tra danh sach rong.")
 
     # 2. Route classification check
     print("\n[2/6] Kiem tra Routing Classification...")
@@ -40,10 +37,15 @@ def run_all_checks():
     assert len(res_exact) >= 1, "Khong tim thay Dune"
     top_exact = res_exact[0]
     assert "dune" in top_exact["title"].lower(), f"Title khong khop: {top_exact['title']}"
-    assert "frank herbert" in top_exact["author_names"].lower(), f"Author khong khop: {top_exact['author_names']}"
+    assert "frank herbert" in top_exact["author_names"].lower(), (
+        f"Author khong khop: {top_exact['author_names']}"
+    )
     assert top_exact["source"] == "sql"
     assert top_exact["score"] == 1.0
-    print(f"  PASS: Tim thay '{top_exact['title']}' boi '{top_exact['author_names']}' (source={top_exact['source']})")
+    print(
+        f"  PASS: Tim thay '{top_exact['title']}' boi '{top_exact['author_names']}' "
+        f"(source={top_exact['source']})"
+    )
 
     # 4. Numeric SQL Search check
     print("\n[4/6] Kiem tra Numeric SQL Search ('books rated at least 4.2 under 350 pages')...")
@@ -58,7 +60,9 @@ def run_all_checks():
         assert rating is not None and rating >= 4.2, f"Rating vi pham: {rating}"
         assert pages is not None and pages <= 350, f"Pages vi pham: {pages}"
         assert item["source"] == "sql"
-        print(f"  - [{item['book_id']}] {item['title'][:30]} | Rating: {rating:.2f} | Pages: {pages}")
+        print(
+            f"  - [{item['book_id']}] {item['title'][:30]} | Rating: {rating:.2f} | Pages: {pages}"
+        )
     print("  PASS: 100% ket qua thoa man rating >= 4.2 va pages <= 350.")
 
     # 5. Semantic Vector Search check
@@ -72,7 +76,10 @@ def run_all_checks():
         assert item["source"] == "vector"
         assert item["distance"] >= 0.0
         assert len(item["evidence"]) > 0
-        print(f"  - [{item['book_id']}] {item['title'][:30]} | Dist: {item['distance']} | Score: {item['score']}")
+        print(
+            f"  - [{item['book_id']}] {item['title'][:30]} "
+            f"| Dist: {item['distance']} | Score: {item['score']}"
+        )
     print("  PASS: Vector search tra ve ket qua ngu nghia co evidence va provenance.")
 
     # 6. Mixed Search & Impossible Constraint checks
@@ -87,7 +94,10 @@ def run_all_checks():
         assert pages is not None and pages <= 400, f"Pages vi pham: {pages}"
         assert "fantasy" in genres, f"Genre vi pham: {genres}"
         assert item["source"] == "mixed"
-        print(f"  - [MIXED: {item['book_id']}] {item['title'][:30]} | Rating: {rating:.2f} | Pages: {pages} | Dist: {item['distance']}")
+        print(
+            f"  - [MIXED: {item['book_id']}] {item['title'][:30]} "
+            f"| Rating: {rating:.2f} | Pages: {pages} | Dist: {item['distance']}"
+        )
     print("  PASS: Mixed search thoa man ca hard constraints va semantic relevancy.")
 
     # Impossible check

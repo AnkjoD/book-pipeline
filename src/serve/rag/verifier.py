@@ -6,6 +6,7 @@ Evaluates generated answer against the provenance map:
 - REGENERATE: Invalid citations or malformed output (caller can retry).
 - ABSTAIN: No evidence exists, system safely refuses to answer.
 """
+
 from typing import Any, Dict, List
 
 
@@ -29,7 +30,6 @@ def verify_answer(
             "cited_books": List[Dict[str, Any]],  # metadata of actually cited books
         }
     """
-    answer_text = answer_result.get("answer", "")
     citations = answer_result.get("citations", [])
     has_answer = answer_result.get("has_answer", False)
 
@@ -43,7 +43,7 @@ def verify_answer(
             "cited_books": [],
         }
 
-    if not has_answer and not citations:
+    if not has_answer:
         return {
             "status": "ABSTAIN",
             "reason": "Model correctly identified lack of evidence.",
@@ -83,7 +83,7 @@ def verify_answer(
 
     return {
         "status": "ACCEPT",
-        "reason": "All citations grounded in provided context.",
+        "reason": "All citation IDs exist in the provided context; claims are not verified.",
         "valid_citations": valid_citations,
         "invalid_citations": [],
         "cited_books": cited_books,

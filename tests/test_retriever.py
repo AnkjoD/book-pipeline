@@ -1,7 +1,8 @@
 """Unit and integration test checks cho retriever.py."""
 
 import pytest
-from src.serve.rag.retriever import _parse_filters, _route, search
+
+from src.serve.rag.retriever import _route, search
 
 
 def test_empty_query_raises_value_error():
@@ -17,6 +18,7 @@ def test_route_classification():
     assert _route("books above rating 6 and under 0 pages") == "sql"
 
 
+@pytest.mark.integration
 def test_exact_sql_search():
     results = search("Dune by Frank Herbert", limit=3)
     assert len(results) >= 1
@@ -30,6 +32,7 @@ def test_exact_sql_search():
     assert "document_hash" in top["metadata"]
 
 
+@pytest.mark.integration
 def test_numeric_sql_search():
     results = search("books rated at least 4.2 under 350 pages", limit=5)
     assert len(results) > 0
@@ -49,6 +52,7 @@ def test_numeric_sql_search():
         assert item["source"] == "sql"
 
 
+@pytest.mark.integration
 def test_semantic_vector_search():
     results = search("a dark story about memory and grief", limit=5)
     assert len(results) > 0
@@ -66,6 +70,7 @@ def test_semantic_vector_search():
         assert len(item["evidence"]) > 0
 
 
+@pytest.mark.integration
 def test_mixed_search():
     results = search("dark fantasy under 400 pages rated above 4", limit=5)
     assert len(results) > 0

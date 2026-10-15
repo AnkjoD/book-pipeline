@@ -2,7 +2,7 @@
 
 Dự án lấy dữ liệu sách từ API GraphQL của [Hardcover](https://hardcover.app), lưu dữ liệu thô vào MinIO, chuẩn hóa bằng PySpark và tạo các bảng phục vụ phân tích bằng dbt + DuckDB. Một nhánh riêng đưa nội dung sách sang PostgreSQL có `pgvector` để tìm kiếm ngữ nghĩa và làm nền cho ứng dụng Streamlit.
 
-> **Trạng thái:** pipeline dữ liệu Bronze → Silver → Gold đã có mã nguồn và artefact chạy thành công trong repository. Nhánh RAG và giao diện Streamlit vẫn đang phát triển; chưa nên xem là ứng dụng hoàn chỉnh.
+> **Trạng thái 15/10/2026:** pipeline dữ liệu và chatbot local đã có baseline chạy được. SQL lookup/filter trả metadata theo template; semantic/mixed gọi Ollama và có thể từ chối khi thiếu evidence. Verifier kiểm tra citation ID, chưa kiểm chứng từng nhận định. Dashboard và vận hành production còn để phát triển sau.
 
 ## Dự án giải quyết việc gì?
 
@@ -60,14 +60,15 @@ flowchart LR
 
 ### In progress
 
-- Script tạo pgvector index từ `dim_books` đã có, nhưng dependency RAG chưa được khai báo đầy đủ trong `pyproject.toml`/`requirements.txt` và chưa có bằng chứng chạy end-to-end trong repository.
-- Retriever mới ở mức khởi tạo vector store; hiện còn lỗi import/thiếu luồng truy vấn hoàn chỉnh.
-- Streamlit: `src/serve/chatbot.py` và `src/serve/dashboard.py` chưa có ứng dụng chạy được.
+- Retriever SQL/vector/mixed, context builder, Ollama generator, citation verifier và Streamlit chatbot đã có baseline local được kiểm tra.
+- Indexer đọc `rag_documents`, mặc định 10.000 sách; collection hiện có 39.604 chunks.
+- Có bộ 40 câu dev với ID/nhãn dựa trên Gold để đo Recall@k, MRR@k và hit rate; nhãn ngữ nghĩa còn một phần, chưa được người dùng duyệt hoặc giữ riêng để test.
+- `src/serve/dashboard.py` còn trống; incremental/versioned index và claim-level verification chưa triển khai.
 
 ### Planned
 
-- Hoàn thiện retriever, trả lời có nguồn và giao diện Streamlit.
-- Bổ sung dependency, cấu hình và kiểm thử end-to-end cho nhánh RAG.
+- Lexical retrieval, RRF, nhãn relevance tiếng Việt được người dùng duyệt và kiểm chứng từng nhận định.
+- Index có phiên bản và cập nhật tăng dần.
 - Mở rộng Airflow từ ingestion sang Bronze → Silver → Gold → vector index.
 - Thêm quan sát chất lượng dữ liệu và vận hành production.
 
@@ -172,7 +173,40 @@ python -m pytest -q
 
 ### Nhánh RAG và Streamlit
 
-Chưa có quick start bảo đảm chạy end-to-end. `src/serve/rag/build_index.py` thể hiện hướng triển khai Gold DuckDB → embedding → PostgreSQL `pgvector`, nhưng dependency và retriever còn cần hoàn thiện. Streamlit vẫn đang phát triển.
+**Tích hợp tiếng Việt:** các câu tự nhiên/không dấu hiện đi qua Ollama tạo QueryPlan có schema → LangChain SelfQueryRetriever → pgvector. Tên sách/tác giả rõ giữ SQL. Các giới hạn số rõ được đối chiếu bằng code; câu mơ hồ trả `CLARIFY`. Đặt `QUERY_MODEL` nếu muốn đổi model hiểu câu hỏi (độc lập với model viết đáp án trong sidebar). Bộ phát triển 12 câu đã được kiểm tra, chưa phải đánh giá ngôn ngữ tổng quát.
+
+Walkthrough mới: `docs/WALKTHROUGH_SELF_QUERY_INTEGRATION.md`; chạy kiểm tra tích hợp bằng `python scripts/evaluate_integrated_vietnamese.py`.
+
+Máy hiện tại dùng Conda environment `aiEnv`. Với môi trường mới, tạo environment Python phù hợp trước, rồi cài extras:
+
+```bat
+conda activate aiEnv
+cd /d D:\lap_trinh\my_project\book-pipeline
+python -m pip install -e ".[ingestion,serve,dev]"
+docker compose up -d minio postgres-vector
+ollama list
+python -m pytest -q
+python -m ruff check src tests scripts
+python -m streamlit run src/serve/chatbot.py
+```
+
+Ollama cần chạy và có model đã chọn trong sidebar. SQL answers không cần LLM; semantic/mixed dùng LLM. Gold DuckDB và vector collection phải đã tồn tại; clone source không mang theo dữ liệu runtime.
+
+```bat
+python tests/eval_retriever.py
+python scripts/smoke_rag.py
+python -m scripts.evaluate_relevance
+```
+
+Relevance report lưu tại `data/reports/relevance_baseline.json` và `.md`, tách điểm theo loại câu/ngôn ngữ, lỗi dịch vụ và kiểm tra hash nhãn. `tests/relevance_dataset.json` là dữ liệu đánh giá; chatbot chỉ nhận câu hỏi, không nhận đáp án chuẩn. Giữ dataset cố định khi so kết quả; chỉ chạy `python -m scripts.build_relevance_dataset` sau khi review thay đổi Gold. SQL và vector hiện có corpus khác nhau, chưa dùng báo cáo này để khẳng định thuật toán nào tốt hơn.
+
+Smoke report lưu ở `data/reports/rag_smoke.json`. Nó kiểm tra luồng dịch vụ và trạng thái an toàn, không chứng minh semantic relevance hoặc factual correctness. Semantic/mixed có thể ABSTAIN dù retriever tìm được sách.
+
+Test offline/CI: `python -m pytest -q -m "not integration"`. Test integration cần Gold, pgvector và embedding model. Nếu model đã có cache, có thể dùng `set HF_HUB_OFFLINE=1` để tránh gọi Hugging Face khi khởi động.
+
+**Reranker tùy chọn:** đã tích hợp cross-encoder CPU, nhận English semantic query sau bước hiểu câu Việt. Đặt `RAG_RERANK_ENABLED=1` trước khi mở app để bật; mặc định 0. Chỉ xếp lại ứng viên đã lọc, giữ metadata/evidence, bỏ qua SQL và tra tên sách. Model lỗi thì quay về thứ tự retrieval có ghi trạng thái fallback. Chạy `python -m scripts.benchmark_reranking` để so trên cùng candidate pool. Trong bộ 40 câu dev hiện tại, reranker giữ nguyên hit rate/MRR và thêm khoảng nửa giây cho mỗi câu được rerank, nên chưa bật mặc định.
+
+`build_index.py` xóa collection trước khi rebuild; chỉ chạy khi chủ động cần dựng lại. Walkthrough và các bài tự code nâng cấp nằm tại `docs/WALKTHROUGH_2026-10-15.md` và `docs/learning/README.md` (thư mục docs hiện bị Git ignore).
 
 ## Cấu trúc repository
 
