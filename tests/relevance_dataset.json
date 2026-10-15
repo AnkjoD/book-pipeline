@@ -1,0 +1,864 @@
+{
+  "version": 1,
+  "created_at": "2026-10-15T08:28:27.924369+00:00",
+  "scope": "Development diagnostics; no held-out or human-reviewed semantic test set",
+  "gold_rows": 2536241,
+  "limitations": [
+    "Semantic positives are incomplete; recall is labeled-positive recall, not corpus recall",
+    "Exact labels may include multiple editions; also inspect hit rate and MRR",
+    "SQL uses all Gold; vector uses only the current indexed subset",
+    "Do not compare algorithms on different corpora or claim held-out gains"
+  ],
+  "book_snapshots": {
+    "312460": {
+      "title": "Dune",
+      "author_names": "Brian Herbert, Frank Herbert",
+      "document_hash": "c82da64a1c8e7573a90dcb9741b83563"
+    },
+    "356467": {
+      "title": "Animal Farm",
+      "author_names": "George Orwell",
+      "document_hash": "ae82c766993491f26a14d2044d0ed3d1"
+    },
+    "379760": {
+      "title": "1984",
+      "author_names": "George Orwell, Peter Hobley Davison, Shepard Fairey",
+      "document_hash": "89f0e0cb5b1751d08b977613ef90ac0d"
+    },
+    "375938": {
+      "title": "Fahrenheit 451",
+      "author_names": "Ray Bradbury",
+      "document_hash": "8951b4a18fc7b7a0d44b6720af20e9a6"
+    },
+    "379647": {
+      "title": "Pride and Prejudice",
+      "author_names": "Jane Austen",
+      "document_hash": "10c023b5ddaf58d069c1e75557623b63"
+    },
+    "194793": {
+      "title": "Pride and Prejudice",
+      "author_names": "Fern Siegel, Jane Austen, Joseph Miralles",
+      "document_hash": "64d9a644e00ec586d2148934f9764a81"
+    },
+    "150223": {
+      "title": "Pride and Prejudice",
+      "author_names": "Academic Industries, Jane Austen",
+      "document_hash": "6a176be79ce7b316a474c6749f96c2c2"
+    },
+    "377193": {
+      "title": "The Great Gatsby",
+      "author_names": "F. Scott Fitzgerald",
+      "document_hash": "ccf0c14187638b26c89fdb750907ec58"
+    },
+    "2808296": {
+      "title": "The Great Gatsby",
+      "author_names": "F. Scott Fitzgerald, Jesmyn Ward",
+      "document_hash": "47fe8e8ad679eb7468b19f62bd7bed80"
+    },
+    "88639": {
+      "title": "The Hunger Games",
+      "author_names": "Suzanne Collins",
+      "document_hash": "c8729c1034ffbd9d6dbe8e68ecb431d4"
+    },
+    "292354": {
+      "title": "The Martian",
+      "author_names": "Andy Weir",
+      "document_hash": "503a04609c3ac73fe30e6327cf88603d"
+    }
+  },
+  "cases": [
+    {
+      "id": "exact_01_1",
+      "question": "Dune by Frank Herbert",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "312460"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Dune"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Frank Herbert"
+        }
+      ]
+    },
+    {
+      "id": "exact_01_2",
+      "question": "\"Dune\" by Frank Herbert",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "312460"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Dune"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Frank Herbert"
+        }
+      ]
+    },
+    {
+      "id": "exact_01_3",
+      "question": "tìm sách \"Dune\" của Frank Herbert",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "312460"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Dune"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Frank Herbert"
+        }
+      ]
+    },
+    {
+      "id": "exact_02_1",
+      "question": "Animal Farm by George Orwell",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "356467"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Animal Farm"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "George Orwell"
+        }
+      ]
+    },
+    {
+      "id": "exact_02_2",
+      "question": "\"Animal Farm\" by George Orwell",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "356467"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Animal Farm"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "George Orwell"
+        }
+      ]
+    },
+    {
+      "id": "exact_02_3",
+      "question": "tìm sách \"Animal Farm\" của George Orwell",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "356467"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Animal Farm"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "George Orwell"
+        }
+      ]
+    },
+    {
+      "id": "exact_03_1",
+      "question": "1984 by George Orwell",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379760"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "1984"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "George Orwell"
+        }
+      ]
+    },
+    {
+      "id": "exact_03_2",
+      "question": "\"1984\" by George Orwell",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379760"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "1984"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "George Orwell"
+        }
+      ]
+    },
+    {
+      "id": "exact_03_3",
+      "question": "tìm sách \"1984\" của George Orwell",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379760"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "1984"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "George Orwell"
+        }
+      ]
+    },
+    {
+      "id": "exact_04_1",
+      "question": "Fahrenheit 451 by Ray Bradbury",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "375938"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Fahrenheit 451"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Ray Bradbury"
+        }
+      ]
+    },
+    {
+      "id": "exact_04_2",
+      "question": "\"Fahrenheit 451\" by Ray Bradbury",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "375938"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Fahrenheit 451"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Ray Bradbury"
+        }
+      ]
+    },
+    {
+      "id": "exact_04_3",
+      "question": "tìm sách \"Fahrenheit 451\" của Ray Bradbury",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "375938"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Fahrenheit 451"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Ray Bradbury"
+        }
+      ]
+    },
+    {
+      "id": "exact_05_1",
+      "question": "Pride and Prejudice by Jane Austen",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379647",
+        "194793",
+        "150223"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Pride and Prejudice"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Jane Austen"
+        }
+      ]
+    },
+    {
+      "id": "exact_05_2",
+      "question": "\"Pride and Prejudice\" by Jane Austen",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379647",
+        "194793",
+        "150223"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Pride and Prejudice"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Jane Austen"
+        }
+      ]
+    },
+    {
+      "id": "exact_05_3",
+      "question": "tìm sách \"Pride and Prejudice\" của Jane Austen",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379647",
+        "194793",
+        "150223"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "Pride and Prejudice"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Jane Austen"
+        }
+      ]
+    },
+    {
+      "id": "exact_06_1",
+      "question": "The Great Gatsby by F. Scott Fitzgerald",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "377193",
+        "2808296"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Great Gatsby"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "F. Scott Fitzgerald"
+        }
+      ]
+    },
+    {
+      "id": "exact_06_2",
+      "question": "\"The Great Gatsby\" by F. Scott Fitzgerald",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "377193",
+        "2808296"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Great Gatsby"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "F. Scott Fitzgerald"
+        }
+      ]
+    },
+    {
+      "id": "exact_06_3",
+      "question": "tìm sách \"The Great Gatsby\" của F. Scott Fitzgerald",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "377193",
+        "2808296"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Great Gatsby"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "F. Scott Fitzgerald"
+        }
+      ]
+    },
+    {
+      "id": "exact_07_1",
+      "question": "The Hunger Games by Suzanne Collins",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "88639"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Hunger Games"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Suzanne Collins"
+        }
+      ]
+    },
+    {
+      "id": "exact_07_2",
+      "question": "\"The Hunger Games\" by Suzanne Collins",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "88639"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Hunger Games"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Suzanne Collins"
+        }
+      ]
+    },
+    {
+      "id": "exact_07_3",
+      "question": "tìm sách \"The Hunger Games\" của Suzanne Collins",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "88639"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Hunger Games"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Suzanne Collins"
+        }
+      ]
+    },
+    {
+      "id": "exact_08_1",
+      "question": "The Martian by Andy Weir",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Martian"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Andy Weir"
+        }
+      ]
+    },
+    {
+      "id": "exact_08_2",
+      "question": "\"The Martian\" by Andy Weir",
+      "type": "exact",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Martian"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Andy Weir"
+        }
+      ]
+    },
+    {
+      "id": "exact_08_3",
+      "question": "tìm sách \"The Martian\" của Andy Weir",
+      "type": "exact",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "all_gold_exact_title_author_matches",
+      "label_method": "Independent SQL; all matching book IDs",
+      "constraints": [
+        {
+          "field": "title",
+          "op": "text_eq",
+          "value": "The Martian"
+        },
+        {
+          "field": "author_names",
+          "op": "contains",
+          "value": "Andy Weir"
+        }
+      ]
+    },
+    {
+      "id": "semantic_01_en",
+      "question": "story about Paul Atreides on the desert planet Arrakis",
+      "type": "semantic",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "312460"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "desert planet Arrakis"
+    },
+    {
+      "id": "semantic_01_vi",
+      "question": "tìm truyện về Paul Atreides trên hành tinh sa mạc Arrakis",
+      "type": "semantic",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "312460"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "desert planet Arrakis"
+    },
+    {
+      "id": "semantic_02_en",
+      "question": "story about farm animals rebelling led by pigs Napoleon and Snowball",
+      "type": "semantic",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "356467"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "pigs Napoleon and Snowball"
+    },
+    {
+      "id": "semantic_02_vi",
+      "question": "tìm truyện về động vật nổi dậy trong trang trại do Napoleon và Snowball dẫn dắt",
+      "type": "semantic",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "356467"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "pigs Napoleon and Snowball"
+    },
+    {
+      "id": "semantic_03_en",
+      "question": "story about Winston Smith rewriting history at the Ministry of Truth",
+      "type": "semantic",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379760"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "Ministry of Truth"
+    },
+    {
+      "id": "semantic_03_vi",
+      "question": "tìm truyện về Winston Smith sửa lại lịch sử tại Bộ Sự thật",
+      "type": "semantic",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "379760"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "Ministry of Truth"
+    },
+    {
+      "id": "semantic_04_en",
+      "question": "story about fireman Guy Montag burning forbidden books",
+      "type": "semantic",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "375938"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "His job is to burn books"
+    },
+    {
+      "id": "semantic_04_vi",
+      "question": "tìm truyện về lính cứu hỏa Guy Montag có nhiệm vụ đốt sách bị cấm",
+      "type": "semantic",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "375938"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "His job is to burn books"
+    },
+    {
+      "id": "semantic_05_en",
+      "question": "story about astronaut Mark Watney surviving alone stranded on Mars",
+      "type": "semantic",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "stranded on Mars"
+    },
+    {
+      "id": "semantic_05_vi",
+      "question": "tìm truyện về phi hành gia Mark Watney bị bỏ lại một mình trên sao Hỏa",
+      "type": "semantic",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_method": "Agent-authored from Gold descriptions; not human reviewed",
+      "label_evidence": "stranded on Mars"
+    },
+    {
+      "id": "mixed_mars_en",
+      "question": "story about astronaut Mark Watney surviving alone stranded on Mars under 400 pages",
+      "type": "mixed",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_evidence": "stranded on Mars",
+      "constraints": [
+        {
+          "field": "pages_clean",
+          "op": "lt",
+          "value": 400
+        }
+      ]
+    },
+    {
+      "id": "mixed_mars_vi",
+      "question": "tìm truyện về phi hành gia Mark Watney bị bỏ lại một mình trên sao Hỏa, dưới 400 trang",
+      "type": "mixed",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [
+        "292354"
+      ],
+      "label_scope": "partial_evidence_supported_positives",
+      "label_evidence": "stranded on Mars",
+      "constraints": [
+        {
+          "field": "pages_clean",
+          "op": "lt",
+          "value": 400
+        }
+      ]
+    },
+    {
+      "id": "empty_01",
+      "question": "books with rating above 6.0",
+      "type": "unanswerable",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [],
+      "expected_empty": true,
+      "label_scope": "impossible_or_empty_input"
+    },
+    {
+      "id": "empty_02",
+      "question": "books under 0 pages",
+      "type": "unanswerable",
+      "language": "en",
+      "split": "dev",
+      "relevant_book_ids": [],
+      "expected_empty": true,
+      "label_scope": "impossible_or_empty_input"
+    },
+    {
+      "id": "empty_03",
+      "question": "sách xuất bản năm 9999",
+      "type": "unanswerable",
+      "language": "vi",
+      "split": "dev",
+      "relevant_book_ids": [],
+      "expected_empty": true,
+      "label_scope": "impossible_or_empty_input"
+    },
+    {
+      "id": "empty_04",
+      "question": "",
+      "type": "unanswerable",
+      "language": "und",
+      "split": "dev",
+      "relevant_book_ids": [],
+      "expected_empty": true,
+      "label_scope": "impossible_or_empty_input"
+    }
+  ]
+}
