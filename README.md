@@ -2,7 +2,18 @@
 
 Dự án lấy dữ liệu sách từ API GraphQL của [Hardcover](https://hardcover.app), lưu dữ liệu thô vào MinIO, chuẩn hóa bằng PySpark và tạo các bảng phục vụ phân tích bằng dbt + DuckDB. Một nhánh riêng đưa nội dung sách sang PostgreSQL có `pgvector` để tìm kiếm ngữ nghĩa và làm nền cho ứng dụng Streamlit.
 
-> **Trạng thái 15/10/2026:** pipeline dữ liệu và chatbot local đã có baseline chạy được. SQL lookup/filter trả metadata theo template; semantic/mixed gọi Ollama và có thể từ chối khi thiếu evidence. Verifier kiểm tra citation ID, chưa kiểm chứng từng nhận định. Dashboard và vận hành production còn để phát triển sau.
+> **Trạng thái 16/10/2026:** bản demo local đã có pipeline dữ liệu, chatbot RAG, hiểu câu hỏi tiếng Việt qua QueryPlan + SelfQueryRetriever, reranker tùy chọn và các chế độ hybrid BM25/RRF + local GraphRAG thử nghiệm. Verifier kiểm tra citation ID, chưa kiểm chứng từng nhận định. Dashboard và vận hành production chưa triển khai.
+
+### Quy mô và phạm vi
+
+| Thành phần | Quy mô đã kiểm tra |
+|---|---|
+| Gold DuckDB | Khoảng 2,5 triệu bản ghi sách |
+| Vector index baseline | 10.000 sách, 39.604 chunks |
+| Hybrid/local GraphRAG | Artifact riêng 300 sách; bổ sung entity từ 24 mô tả |
+| Kiểm thử Python | 146 tests pass ở lần chạy local ngày 15/10/2026, gồm integration |
+
+Các số liệu mô tả dữ liệu/runtime đã dựng trên máy phát triển, không phải dữ liệu đi kèm repository. Hybrid/graph chưa phủ toàn bộ vector index hoặc Gold.
 
 ## Dự án giải quyết việc gì?
 
@@ -29,7 +40,14 @@ flowchart LR
     GO --> IDX[Embedding + lập chỉ mục]
     IDX --> PG[(PostgreSQL<br/>pgvector)]
     PG --> RET[Retriever]
-    RET --> UI[Streamlit<br/>đang phát triển]
+    GO --> EXP[(SQLite thử nghiệm<br/>BM25 + local graph)]
+    EXP --> RET
+    Q[Câu hỏi] --> PLAN[QueryPlan + filter]
+    PLAN --> RET
+    RET --> CTX[Context + provenance]
+    CTX --> ANS[Template metadata / Ollama]
+    ANS --> VER[Kiểm tra citation ID]
+    VER --> UI[Streamlit chatbot]
     AF[Apache Airflow] -. điều phối ingestion .-> ING
 ```
 
@@ -42,7 +60,8 @@ flowchart LR
 | Silver | PySpark, Parquet | Làm phẳng cấu trúc, ép kiểu, loại bản trùng và tách bảng quan hệ |
 | Gold | dbt, DuckDB | Mô hình phân tích như `dim_books`, `dim_authors`, `dim_editions`, `dim_tags`, bridge và fact |
 | Vector index | PostgreSQL, pgvector | Kho embedding riêng, được xây từ dữ liệu Gold |
-| Phục vụ | Retriever, Streamlit | Tìm kiếm ngữ nghĩa và giao diện người dùng; đang phát triển |
+| Tìm kiếm thử nghiệm | SQLite FTS5, graph local, RRF | BM25+dense hoặc graph+dense trên cùng artifact 300 sách |
+| Phục vụ | LangChain, Ollama, Streamlit | QueryPlan, tìm kiếm có filter, context, đáp án và kiểm tra citation |
 | Điều phối | Airflow | DAG full, daily và weekly cho ingestion; chưa nối tự động toàn bộ transform/RAG |
 
 ## Trạng thái triển khai
@@ -58,12 +77,15 @@ flowchart LR
 - Docker Compose cho MinIO, PostgreSQL metadata của Airflow, PostgreSQL `pgvector`, Airflow webserver và scheduler.
 - Ba DAG ingestion: full thủ công, daily và weekly.
 
-### In progress
+### Đã triển khai cho bản demo local
 
 - Retriever SQL/vector/mixed, context builder, Ollama generator, citation verifier và Streamlit chatbot đã có baseline local được kiểm tra.
 - Indexer đọc `rag_documents`, mặc định 10.000 sách; collection hiện có 39.604 chunks.
 - Có bộ 40 câu dev với ID/nhãn dựa trên Gold để đo Recall@k, MRR@k và hit rate; nhãn ngữ nghĩa còn một phần, chưa được người dùng duyệt hoặc giữ riêng để test.
-- `src/serve/dashboard.py` còn trống; incremental/versioned index và claim-level verification chưa triển khai.
+- QueryPlan có schema/guard, LangChain SelfQueryRetriever và translator cho PGVector hỗ trợ câu hỏi tiếng Việt.
+- Cross-encoder reranker tùy chọn, có fallback khi lỗi; mặc định tắt theo kết quả benchmark dev.
+- Hybrid BM25+dense qua RRF; local GraphRAG với quan hệ title/credit/series và entity character/place có kiểm tra quote, kèm đường dẫn nguồn.
+- Ba lựa chọn tìm kiếm trong Streamlit: baseline, hybrid và graph; nhánh thử nghiệm dùng artifact riêng 300 sách.
 
 ### Planned
 
@@ -71,6 +93,7 @@ flowchart LR
 - Index có phiên bản và cập nhật tăng dần.
 - Mở rộng Airflow từ ingestion sang Bronze → Silver → Gold → vector index.
 - Thêm quan sát chất lượng dữ liệu và vận hành production.
+- Dashboard, memory hội thoại có cấu trúc và kiểm chứng từng nhận định. Lịch sử chat hiển thị hiện tại chưa phải conversational memory.
 
 ## Quick start — Windows CMD
 
@@ -173,9 +196,9 @@ python -m pytest -q
 
 ### Nhánh RAG và Streamlit
 
-**Tích hợp tiếng Việt:** các câu tự nhiên/không dấu hiện đi qua Ollama tạo QueryPlan có schema → LangChain SelfQueryRetriever → pgvector. Tên sách/tác giả rõ giữ SQL. Các giới hạn số rõ được đối chiếu bằng code; câu mơ hồ trả `CLARIFY`. Đặt `QUERY_MODEL` nếu muốn đổi model hiểu câu hỏi (độc lập với model viết đáp án trong sidebar). Bộ phát triển 12 câu đã được kiểm tra, chưa phải đánh giá ngôn ngữ tổng quát.
+**Tích hợp tiếng Việt:** các câu tự nhiên/không dấu được nhận diện sẽ đi qua Ollama tạo QueryPlan có schema → LangChain SelfQueryRetriever → pgvector. Một số mẫu tra tên sách/tác giả đơn giản dùng SQL; không phải mọi câu có tên sách đều bỏ qua model. Các giới hạn số rõ được đối chiếu bằng code; câu mơ hồ trả `CLARIFY`. Đặt `QUERY_MODEL` nếu muốn đổi model hiểu câu hỏi (độc lập với model viết đáp án trong sidebar). Bộ câu dev đã kiểm tra chưa chứng minh hỗ trợ mọi cách diễn đạt, lỗi chính tả hoặc ngôn ngữ.
 
-Walkthrough mới: `docs/WALKTHROUGH_SELF_QUERY_INTEGRATION.md`; chạy kiểm tra tích hợp bằng `python scripts/evaluate_integrated_vietnamese.py`.
+Chạy kiểm tra tích hợp bằng `python scripts/evaluate_integrated_vietnamese.py`.
 
 Máy hiện tại dùng Conda environment `aiEnv`. Với môi trường mới, tạo environment Python phù hợp trước, rồi cài extras:
 
@@ -190,7 +213,7 @@ python -m ruff check src tests scripts
 python -m streamlit run src/serve/chatbot.py
 ```
 
-Ollama cần chạy và có model đã chọn trong sidebar. SQL answers không cần LLM; semantic/mixed dùng LLM. Gold DuckDB và vector collection phải đã tồn tại; clone source không mang theo dữ liệu runtime.
+Ollama cần chạy và có model đã chọn trong sidebar; model hiểu câu hỏi cấu hình bằng `QUERY_MODEL`, mặc định `qwen2.5:7b-instruct-q4_K_M`. Đáp án metadata dùng template không gọi model sinh đáp án, nhưng bước hiểu câu Việt vẫn có thể cần Ollama. Gold DuckDB và vector collection phải đã tồn tại; clone source không mang theo dữ liệu runtime. Indexer ở `src/serve/rag/build_index.py`; chỉ chạy khi chủ động muốn dựng/rebuild collection.
 
 ```bat
 python tests/eval_retriever.py
@@ -208,7 +231,21 @@ Test offline/CI: `python -m pytest -q -m "not integration"`. Test integration c�
 
 **Hybrid/GraphRAG thử nghiệm:** đã có BM25+dense qua RRF và local graph+dense trên artifact 300 sách. Dựng bằng `python -m scripts.build_search_experiment`, so bằng `python -m scripts.compare_search_strategies`. Trong sidebar chọn **Cách tìm sách** để thử; mặc định giữ baseline. Xem [hướng dẫn và giới hạn](tests/SEARCH_EXPERIMENT.md). Chưa có community/global search của Microsoft GraphRAG; dữ liệu graph/lexical không thay thế full index hiện có.
 
-`build_index.py` xóa collection trước khi rebuild; chỉ chạy khi chủ động cần dựng lại. Walkthrough và các bài tự code nâng cấp nằm tại `docs/WALKTHROUGH_2026-10-15.md` và `docs/learning/README.md` (thư mục docs hiện bị Git ignore).
+`build_index.py` xóa collection trước khi rebuild; chỉ chạy khi chủ động cần dựng lại.
+
+### Thử hybrid và local GraphRAG
+
+Sau khi Gold, vector index và Ollama đã sẵn sàng:
+
+```bat
+python -m scripts.build_search_experiment
+python -m scripts.compare_search_strategies
+python -m scripts.smoke_search_experiment
+```
+
+Trong sidebar **Cách tìm sách**, chọn **Theo quan hệ GraphRAG (thử nghiệm)** rồi hỏi `tìm sách cùng bộ với "Catching Fire"`. Grammar quan hệ hiện hỗ trợ một số mẫu cùng bộ/cùng người được ghi công và tên sách trong dấu nháy kép. Nhánh graph kết hợp dense với graph bằng RRF; nhánh hybrid kết hợp dense với BM25.
+
+Trên 44 câu dev trong cùng corpus 300 sách (40 answerable, 4 unanswerable), Hit@5 trên các câu answerable đã đo là dense **95%**, hybrid **97,5%**, graph **100%**. Đây là bộ dev nhỏ với nhãn một phần, chưa human review/held-out; không phải độ đúng của đáp án LLM hay bằng chứng graph luôn tốt hơn. Các câu quan hệ series/credit cũng có thể giải bằng SQL JOIN. Quy trình và giới hạn ở [SEARCH_EXPERIMENT.md](tests/SEARCH_EXPERIMENT.md).
 
 ## Cấu trúc repository
 
@@ -216,13 +253,9 @@ Test offline/CI: `python -m pytest -q -m "not integration"`. Test integration c�
 book-pipeline/
 ├── config/
 │   └── entities.yaml                   # cấu hình entity ingestion
-├── docs/
-│   ├── papers/                         # paper nghiên cứu và mục lục
-│   ├── LEARNING_ROADMAP.md
-│   └── MIGRATE_FROM_OLD_VERSION.md
 ├── notebooks/
 │   └── eda.ipynb
-├── scripts/                            # hiện chưa có script chính thức
+├── scripts/                            # evaluation, chẩn đoán, benchmark và smoke checks
 ├── src/
 │   ├── clients/
 │   │   ├── hardcover.py                # Hardcover GraphQL client
@@ -240,9 +273,21 @@ book-pipeline/
 │   └── serve/
 │       ├── rag/
 │       │   ├── build_index.py
-│       │   └── retriever.py
-│       ├── chatbot.py                  # placeholder
-│       └── dashboard.py                # placeholder
+│       │   ├── retriever.py
+│       │   ├── query_understanding.py  # QueryPlan + guard
+│       │   ├── query_translator.py     # structured query → PGVector filter
+│       │   ├── lexical.py              # SQLite FTS5/BM25
+│       │   ├── fusion.py               # RRF
+│       │   ├── graph_retriever.py      # local graph traversal + provenance
+│       │   ├── experimental.py         # dense/hybrid/graph cùng corpus
+│       │   ├── reranking.py            # cross-encoder tùy chọn
+│       │   ├── context_builder.py
+│       │   ├── generator.py
+│       │   ├── verifier.py             # kiểm tra citation ID
+│       │   ├── pipeline.py
+│       │   └── evaluation.py
+│       ├── chatbot.py                  # Streamlit chatbot
+│       └── dashboard.py                # chưa triển khai
 ├── tests/
 │   ├── clients/
 │   ├── contracts/
